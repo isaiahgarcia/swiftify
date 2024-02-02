@@ -4,10 +4,29 @@ import SpotifyApiRequest from "@/lib/spotify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Episode, PlaylistTrack, Track } from "spotify-types";
+import { Episode, PlaylistTrack, SimplifiedAlbum, SimplifiedTrack, Track } from "spotify-types";
 
+const stolenAlbumNames = [
+    "Fearless",
+    "Fearless Platinum Edition",
+    "Speak Now",
+    "Speak Now (Deluxe Edition)",
+    "Red",
+    "Red (Deluxe Edition)",
+    "1989",
+    "1989 (Deluxe Edition)"
+];
+
+const tvAlbumNames = [
+    "1989 (Taylor's Version) [Deluxe]",
+    "Speak Now (Taylor's Version)",
+    "Red (Taylor's Version)",
+    "Fearless (Taylor's Version)",
+];
+
+// Caveat function to cast an item as Track type because Track and Episode types are the exact same in Spotify Web API but different in imported Spotify types
 function isTrack(item: Track | Episode): item is Track {
-    return item.type === 'track';
+    return item.type === 'track' || item.type === 'episode';
 }
 
 const PlaylistPage = ({
@@ -16,10 +35,23 @@ const PlaylistPage = ({
     params: { playlistId: string }
 }) => {
     const { data: session } = useSession();
+    const [playlistName, setPlaylistName] = useState<string>('');
     const [songs, setSongs] = useState<PlaylistTrack[]>([]);
+    const [mapping, setMapping] = useState<Object>({});
+    const [stolenIds, setStolenIds] = useState<string[]>([]);
+    const [tvIds, setTvIds] = useState<string[]>([]);
+    const [statuses, setStatuses] = useState<string[]>([]);
 
     // Listen for active session
     useEffect(() => {
+        // Get playlist name
+        async function getPlaylistName() {
+            if (session && session.accessToken) {
+                const data = await SpotifyApiRequest(`https://api.spotify.com/v1/playlists/${params.playlistId}`, session.accessToken);
+                setPlaylistName(data.name);
+            }
+        }
+
         // Grab songs from playlist 
         async function getPlaylistSongs() {
             if (session && session.accessToken) {
@@ -27,43 +59,159 @@ const PlaylistPage = ({
                 setSongs(data.items);
             }
         }
+
+        // Store stolen and tv ids
+        async function createStolenToTVMap() {
+            if (session && session.accessToken) {
+                const stolenToTV: any = {};
+
+                // Get Taylor's albums
+                const data = await SpotifyApiRequest(`https://api.spotify.com/v1/artists/06HL4z0CvFAxyc27GXpf02/albums?include_groups=album&limit=50`, session?.accessToken);
+                const albums: SimplifiedAlbum[] = data.items;
+
+                // Split albums by SV and TV
+                const stolenAlbums = albums.filter((album) => {
+                    return stolenAlbumNames.includes(album.name);
+                });
+                const tvAlbums = albums.filter((album) => {
+                    return tvAlbumNames.includes(album.name);
+                })
+
+                // Loop through stolen albums
+                let ids = [];
+                for (const album of stolenAlbums) {
+                    // Add album name as a key
+                    let name = album.name;
+                    name = name.replace(" (Deluxe Edition)", "");
+                    name = name.replace(" Platinum Edition", "");
+                    if (!stolenToTV[name]) {
+                        stolenToTV[name] = {
+                            name: name
+                        };
+                    }
+
+                    // Traverse into object containing album name
+                    const stolenToTvByAlbum = stolenToTV[name];
+
+                    // Grab SV album tracks
+                    const data = await SpotifyApiRequest(`https://api.spotify.com/v1/albums/${album.id}/tracks`, session.accessToken);
+
+                    // Store SV info into object and into stolenIds
+                    for (const track of data.items) {
+                        ids.push(track.id);
+                        if (!(track.id in stolenToTvByAlbum)) {
+                            stolenToTvByAlbum[track.id] = {
+                                id: track.id,
+                                name: track.name,
+                                tvId: ""
+                            };
+                        }
+                    }
+                }
+                setStolenIds(ids);
+
+                // Loop through TV albums
+                ids = [];
+                for (const album of tvAlbums) {
+                    // Grab TV album tracks
+                    const data = await SpotifyApiRequest(`https://api.spotify.com/v1/albums/${album.id}/tracks`, session.accessToken);
+
+                    // Pattern match album name (e.g. '1989 (Taylor's Version)' -> '1989')
+                    let albumName = album.name.replace(/ *\([^)]*\) */g, "");
+                    albumName = albumName.replace("[Deluxe]", "");
+
+                    // Loop through tracks and store TV ids into tvIds
+                    for (const track of data.items) {
+                        ids.push(track.id);
+                        // Pattern match track name (e.g. 'Bad Blood (Taylor's Version)' -> 'Bad Blood')
+                        let name = track.name;
+                        name = name.replace(/ *\([^)]*\) */g, "");
+                        if (name === "I Knew You Were Trouble") name += ".";
+                        if (track.name === "State Of Grace (Acoustic Version) (Taylor's Version)") name += " - Acoustic";
+                        
+                        // Store TV ids if track names match
+                        const stolenToTvByAlbum = stolenToTV[albumName];
+                        for (const id of Object.keys(stolenToTvByAlbum)) {
+                            if (name === stolenToTvByAlbum[id].name) stolenToTvByAlbum[id].tvId = track.id;
+                        }
+                    }
+                }
+                setTvIds(ids);
+                setMapping(stolenToTV);
+            }
+        }
+
+        getPlaylistName();
         getPlaylistSongs();
+        createStolenToTVMap();
     }, [session, params.playlistId]);
+
+    useEffect(() => {
+        if (songs.length > 0) {
+            const statuses: string[] = [];
+            for (const song of songs) {
+                // Check if song exists and is of type Track
+                if (song.track && isTrack(song.track)) {
+                    // Check if song is a Taylor song
+                    const artistsNames = song.track.artists.map(artist => artist.name);
+                    if (artistsNames.includes("Taylor Swift")) {
+                        // Check if song is stolen, TV, or not yet updated (i.e. reputation and debut)
+                        if (stolenIds.includes(song.track.id)) {
+                            statuses.push('stolen');
+                        } else if (tvIds.includes(song.track.id)) {
+                            statuses.push('re-record');
+                        } else {
+                            statuses.push('');
+                        }
+                    } else {
+                        statuses.push('');
+                    }
+                } else {
+                    statuses.push('');
+                }
+            }
+            setStatuses(statuses);
+        }
+    }, [songs, stolenIds, tvIds]);
     
     return (
-        <div className="w-3/4 pl-5">
+        <div className="w-3/4 pl-7 pr-5 space-y-3">
+            <div className="sticky top-0 bg-slate-950 h-20">
+                <div className="pt-5 text-pretty font-bold">
+                    {playlistName}
+                </div>
+            </div>
             <div className="flex flex-col space-y-3">
                 {
-                    songs.map((item) => {
+                    songs.map((item, idx) => {
                         return item.track && isTrack(item.track) ? (
                             <div key={item.track.id}>
-                                <div className="flex flex-row items-center space-x-2">
-                                    <Image 
-                                        src={item.track.album.images[0].url}
-                                        width={85}
-                                        height={85}
-                                        alt="Song"
-                                    />
-                                    <div className="flex flex-col space-y-1">
-                                        <p>{item.track.name}</p>
-                                        <p className="text-slate-600 text-sm">{item.track.artists[0].name}</p>
+                                <div className="flex justify-between space-x-4 items-center">
+                                    <div className="flex flex-row items-center space-x-2">
+                                        <Image 
+                                            src={item.track.album.images[0].url}
+                                            width={85}
+                                            height={85}
+                                            alt="Song"
+                                        />
+                                        <div className="flex flex-col space-y-1">
+                                            <p>{item.track.name}</p>
+                                            <p className="text-slate-600 text-sm">{item.track.artists.map(artist => artist.name).join(', ')}</p>
+                                        </div>
                                     </div>
+                                    {
+                                        statuses[idx] === 're-record' ? (
+                                            <span className="bg-[#c6e597] rounded-md">
+                                                <p className="text-black text-nowrap text-sm font-bold p-2">{statuses[idx]}</p>
+                                            </span>
+                                        ) : statuses[idx] === 'stolen' ? (
+                                            <span className="bg-[#a03f18] rounded-md">
+                                                <p className="text-black text-nowrap text-sm font-bold p-2">{statuses[idx]}</p>
+                                            </span>
+                                        ) : null
+                                    }
                                 </div>
                             </div>
-                        ) : item.track && !isTrack(item.track) ? (
-                            <div className="flex flex-row items-center space-x-2">
-                                <Image 
-                                    src={item.track.show?.images[0].url}
-                                    width={85}
-                                    height={85}
-                                    alt="Episode"
-                                />
-                                <div className="flex flex-col space-y-1">
-                                    <p>{item.track.name}</p>
-                                    <p className="text-slate-600 text-sm">{item.track.name}</p>
-                                </div>
-                            </div>
-
                         ) : null
                     })
                 }
