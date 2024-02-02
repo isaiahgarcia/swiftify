@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 
 import SessionProvider from "./components/SessionProvider";
 import NavMenu from "./components/NavMenu";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <SessionProvider>
           <main className="max-w-full bg-slate-950 text-2xl flex gap-2">
+            <Toaster position="top-center" />
             <NavMenu />
             {children}
           </main>

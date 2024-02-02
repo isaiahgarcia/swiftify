@@ -9,8 +9,9 @@
 
 // export default spotifyApi;
 
-export default async function SpotifyApiRequest(endpoint: string, token: string) {
+export default async function SpotifyApiRequest(endpoint: string, token: string, method?: string) {
     const response = await fetch(endpoint, {
+        method: method ? method : "GET",
         headers: {
             Authorization: `Bearer ${token}`
         }

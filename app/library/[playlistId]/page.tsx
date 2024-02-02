@@ -4,6 +4,7 @@ import SpotifyApiRequest from "@/lib/spotify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { Episode, PlaylistTrack, SimplifiedAlbum, SimplifiedTrack, Track } from "spotify-types";
 
 const stolenAlbumNames = [
@@ -37,7 +38,7 @@ const PlaylistPage = ({
     const { data: session } = useSession();
     const [playlistName, setPlaylistName] = useState<string>('');
     const [songs, setSongs] = useState<PlaylistTrack[]>([]);
-    const [mapping, setMapping] = useState<Object>({});
+    const [mapping, setMapping] = useState<any>({});
     const [stolenIds, setStolenIds] = useState<string[]>([]);
     const [tvIds, setTvIds] = useState<string[]>([]);
     const [statuses, setStatuses] = useState<string[]>([]);
@@ -146,6 +147,7 @@ const PlaylistPage = ({
         createStolenToTVMap();
     }, [session, params.playlistId]);
 
+    // Track which songs are stolen, re-records, or neither
     useEffect(() => {
         if (songs.length > 0) {
             const statuses: string[] = [];
@@ -173,12 +175,57 @@ const PlaylistPage = ({
             setStatuses(statuses);
         }
     }, [songs, stolenIds, tvIds]);
+
+    // Update playlists with button click
+    const updatePlaylists = async () => {
+        if (session && session.accessToken) {
+            const uris = [];
+            const resource = "spotify:track:";
+    
+            // Loop through all playlist tracks
+            for (const tracks of songs) {
+                const track = tracks.track;
+                if (track && isTrack(track)) {
+                    // Parse album name to match mapping
+                    let albumName = track.album.name.replace(/ *\([^)]*\) */g, "");
+                    albumName = albumName.replace("[Deluxe]", "");
+    
+                    // Populate uris with TV ids if current song id is SV, else keep the same
+                    if (albumName in mapping) {
+                        const songsInMap = mapping[albumName];
+                        if (track.id in songsInMap) {
+                            uris.push(resource + songsInMap[track.id].tvId);
+                        } else {
+                            uris.push(resource + track.id);
+                        }
+                    } else {
+                        uris.push(resource + track.id);
+                    }
+                }
+            }
+    
+            const urisAsString = uris.join(",");
+    
+            // Update playlist with Taylor's Version
+            const data = await SpotifyApiRequest(`https://api.spotify.com/v1/playlists/${params.playlistId}/tracks?uris=${urisAsString}`, session?.accessToken, "PUT");
+
+            toast.success('Playlists updated.');
+        }
+    }
     
     return (
         <div className="w-3/4 pl-7 pr-5 space-y-3">
             <div className="sticky top-0 bg-slate-950 h-20">
-                <div className="pt-5 text-pretty font-bold">
-                    {playlistName}
+                <div className="flex items-center pt-5 justify-between">
+                    <div className="text-pretty font-bold">
+                        {playlistName}
+                    </div>
+                    <button 
+                        className="bg-[#1db954] rounded-xl font-bold text-black p-2"
+                        onClick={updatePlaylists}
+                    >
+                        update
+                    </button>
                 </div>
             </div>
             <div className="flex flex-col space-y-3">

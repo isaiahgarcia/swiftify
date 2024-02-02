@@ -3,20 +3,13 @@ import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-const scopes = [
-    "user-read-private",
-    "user-read-email",
-    "user-top-read",
-    "playlist-read-private",
-    "playlist-modify-public",
-    "playlist-modify-private"
-].join(',');
+const scopes = "user-read-private user-read-email user-top-read playlist-read-private playlist-modify-private playlist-modify-public";
 
 const params = {
-    scopes: scopes
+    scope: scopes
 };
 
-const LOGIN_URL = "https://accounts.spotify.com/authorize?" + new URLSearchParams(params).toString();
+const LOGIN_URL = "https://accounts.spotify.com/authorize?" + new URLSearchParams(params);
 
 async function refreshAccessToken(token: any) {
     // Refreshes an access token
