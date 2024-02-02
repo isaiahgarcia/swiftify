@@ -28,6 +28,10 @@ export default function LibraryPage() {
           playlists = playlists.concat(data?.items);
           offset += 50;
         }
+
+        // Filter playlists by created by current user only (show no followed playlists)
+        const data = await SpotifyApiRequest('https://api.spotify.com/v1/me', session.accessToken);
+        playlists = playlists.filter((track) => track.owner.id === data.id);
         setPlaylists(playlists);
       }
     }
