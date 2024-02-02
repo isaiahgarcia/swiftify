@@ -209,7 +209,14 @@ const PlaylistPage = ({
             // Update playlist with Taylor's Version
             const data = await SpotifyApiRequest(`https://api.spotify.com/v1/playlists/${params.playlistId}/tracks?uris=${urisAsString}`, session?.accessToken, "PUT");
 
-            toast.success('Playlists updated.');
+            if (data && data.snapshot_id) {
+                // Grab playlist and update React state
+                const data = await SpotifyApiRequest(`https://api.spotify.com/v1/playlists/${params.playlistId}/tracks`, session?.accessToken);
+                setSongs(data.items);
+                toast.success('Playlists updated.');
+            } else {
+                toast.error('Access Denied.');
+            }
         }
     }
     
