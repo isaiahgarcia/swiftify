@@ -17,7 +17,7 @@ function AuthButton() {
         return (
             <>
                 <div className="space-y-2">
-                    <h1 className="font-bold text-white text-5xl">Swiftify</h1>
+                    <h1 className="font-bold text-5xl">Swiftify</h1>
                     <h1>{session?.user?.name}</h1>
                     <hr className="my-4" />
                     <button onClick={() => signOut({ callbackUrl: '/' })}>Sign Out</button>
@@ -26,14 +26,7 @@ function AuthButton() {
         );
     }
 
-    return (
-        <>
-            <div className="space-y-2">
-                <h1 className="text-white">Swiftify</h1>
-                <hr className="my-4" />
-            </div>
-        </>
-    );
+    return null;
 };
 
 export default function NavMenu() {
@@ -112,20 +105,7 @@ export default function NavMenu() {
                     }
                 </ul>
                 </>
-            ) : (
-                <ul>
-                    <Link href="/">
-                        <li className={pathname === "/" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                            Home
-                        </li>
-                    </Link>
-                    <Link href="/faq">
-                        <li className={pathname === "/faq" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                            FAQ
-                        </li>
-                    </Link>
-                </ul>
-            )}
+            ) : null}
         </div>
 
     );

@@ -4,7 +4,6 @@ import { Inter as FontSans } from "next/font/google";
 import { getServerSession } from "next-auth";
 
 import SessionProvider from "@/components/SessionProvider";
-import NavMenu from "@/components/NavMenu";
 import { Toaster } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +31,6 @@ export default async function RootLayout({
         <SessionProvider>
           <main className="max-w-full bg-slate-950 text-2xl flex gap-2">
             <Toaster position="top-center" />
-            <NavMenu />
             {children}
           </main>
         </SessionProvider>

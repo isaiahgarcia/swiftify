@@ -222,7 +222,7 @@ const PlaylistPage = ({
     }
     
     return (
-        <div className="w-3/4 pl-7 pr-5 space-y-3">
+        <div className="pl-7 pr-5 space-y-3">
             <div className="sticky top-0 bg-slate-950 h-20">
                 <div className="flex items-center pt-5 justify-between">
                     <div className="text-pretty font-bold">

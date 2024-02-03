@@ -42,7 +42,7 @@ export default function LibraryPage() {
     <>
       {session?.user?.name ? (
         <>
-          <div className=" w-3/4 grid grid-cols-4 grid-flow-row gap-6">
+          <div className="grid grid-cols-4 grid-flow-row gap-6">
             {
               playlists.map((playlist) => 
                 <div key={playlist.id}>
