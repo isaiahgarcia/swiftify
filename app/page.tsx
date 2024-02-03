@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect, useMemo, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 
 import { SimplifiedPlaylist, Track } from "spotify-types";
@@ -16,8 +16,9 @@ export default function Home() {
     async function displayTopTaylorSongs() {
       if (session && session.accessToken) {
         // Grab current user's top Taylor Swift tracks
-        // const data = await SpotifyApiRequest('https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=50', session.accessToken);
-        setTopTaylorSongs([]);
+        const data = await SpotifyApiRequest('https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=50', session.accessToken);
+        data.items = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+        setTopTaylorSongs(data.items);
       }
     }
     displayTopTaylorSongs();
@@ -27,7 +28,7 @@ export default function Home() {
     <>
       {session?.user?.name ? (
         <>
-          <div className="grid grid-cols-1 grid-flow-row gap-6">
+          <div className="flex flex-col space-y-2">
             {
               topTaylorSongs.map((song) => 
                 <div key={song.id}>
@@ -44,7 +45,9 @@ export default function Home() {
           </div>
         </>
       ) : (
-        <div>Not logged in</div>
+        <div className="flex items-center justify-center h-screen w-screen">
+          <button className="text-black rounded-md bg-white hover:bg-slate-300 p-2" onClick={() => signIn('spotify', { callbackUrl: '/' })}>Sign In to Spotify</button>
+        </div>
       )}
     </>
   );

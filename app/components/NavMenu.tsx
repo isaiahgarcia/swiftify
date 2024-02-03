@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { redirect, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SimplifiedPlaylist } from "spotify-types";
 import SpotifyApiRequest from "@/lib/spotify";
@@ -16,16 +16,22 @@ function AuthButton() {
     if (session) {
         return (
             <>
-                {session?.user?.name} <br />
-                <button onClick={() => signOut()}>Sign Out</button>
+                <div className="space-y-2">
+                    <h1 className="font-bold text-5xl">Swiftify</h1>
+                    <h1>{session?.user?.name}</h1>
+                    <hr className="my-4" />
+                    <button onClick={() => signOut({ callbackUrl: '/' })}>Sign Out</button>
+                </div>
             </>
         );
     }
 
     return (
         <>
-            Not signed in <br />
-            <button onClick={() => signIn()}>Sign In</button>
+            <div className="space-y-2">
+                <h1 className="font-bold text-5xl">Swiftify</h1>
+                <hr className="my-4" />
+            </div>
         </>
     );
 };
@@ -66,22 +72,22 @@ export default function NavMenu() {
     return (
         <div className="w-1/4">
             <AuthButton />
-            <hr className="my-4" />
-            <ul>
-                <Link href="/">
-                    <li className={pathname === "/" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                        Home
-                    </li>
-                </Link>
-                <Link href="/library">
-                    <li className={pathname === "/library" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                        Library
-                    </li>
-                </Link>
-            </ul>
-            <hr className="my-4" />
             {session?.user?.name ? (
                 <>
+                <hr className="my-4" />
+                <ul>
+                    <Link href="/">
+                        <li className={pathname === "/" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                            Home
+                        </li>
+                    </Link>
+                    <Link href="/library">
+                        <li className={pathname === "/library" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                            Library
+                        </li>
+                    </Link>
+                </ul>
+                <hr className="my-4" />
                 <ul className="flex flex-col space-y-3">
                     {
                         playlists.map((playlist) => {
@@ -107,7 +113,18 @@ export default function NavMenu() {
                 </ul>
                 </>
             ) : (
-                <div></div>
+                <ul>
+                    <Link href="/">
+                        <li className={pathname === "/" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                            Home
+                        </li>
+                    </Link>
+                    <Link href="/faq">
+                        <li className={pathname === "/faq" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                            FAQ
+                        </li>
+                    </Link>
+                </ul>
             )}
         </div>
 
