@@ -9,6 +9,8 @@ import SpotifyApiRequest from "@/lib/spotify";
 import { redirect } from "next/navigation";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import NavMenu from "@/components/NavMenu";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -31,20 +33,50 @@ export default function Home() {
       {session?.user?.name ? (
         <>
           <NavMenu />
-          <div className="flex flex-col space-y-2">
-            {
-              topTaylorSongs.map((song) => 
-                <div key={song.id}>
-                  <Image
-                    src={song.album.images[0]?.url}
-                    width={100}
-                    height={100}
-                    alt="Song"
-                  />
-                  {song.name}
-                </div>
-              )
-            }
+          <div className="w-3/4 flex flex-col items-center space-y-2">
+            <div className="flex flex-row space-x-20">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Song Stats</CardTitle>
+                  <CardDescription>Card Description</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>Pie Chart</p>
+                </CardContent>
+                <CardFooter>
+                  <p>Card Footer</p>
+                </CardFooter>
+              </Card>
+              <Carousel className="max-w-xs">
+                <CarouselContent>
+                  {
+                    topTaylorSongs.map((song, idx) => 
+                      <CarouselItem key={song.id}>
+                        <div className="p-1">
+                          <Card>
+                            <CardContent className="flex aspect-square items-center justify-center p-6">
+                              <div className="flex flex-col items-center">
+                                <Image
+                                  src={song.album.images[0]?.url}
+                                  width={100}
+                                  height={100}
+                                  alt="Song"
+                                />
+                                <h1 className="text-balance text-center">{song.name}</h1>
+                                <p>{idx+1}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    )
+                  }
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
+            <p>Chart</p>
           </div>
         </>
       ) : (
@@ -73,7 +105,7 @@ export default function Home() {
                   <AccordionTrigger>Why?</AccordionTrigger>
                   <AccordionContent>
                     On the Spotify app, you have to individually delete
-                    and add songs to your playlists which is time consuming.
+                    and add songs to your playlists.
                     When Taylor releases a new re-recorded album, this becomes
                     time-consuming if you are a Swiftie with many songs on many playlists.
                     And as a Swiftie, of course you want to support Taylor&apos;s
