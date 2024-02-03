@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import SpotifyApiRequest from "@/lib/spotify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -255,13 +256,13 @@ const PlaylistPage = ({
                                     </div>
                                     {
                                         statuses[idx] === 're-record' ? (
-                                            <span className="bg-[#c6e597] rounded-md">
+                                            <Badge className="bg-[#c6e597] rounded-md">
                                                 <p className="text-black text-nowrap text-sm font-bold p-2">{statuses[idx]}</p>
-                                            </span>
+                                            </Badge>
                                         ) : statuses[idx] === 'stolen' ? (
-                                            <span className="bg-[#a03f18] rounded-md">
+                                            <Badge className="bg-[#a03f18] rounded-md">
                                                 <p className="text-black text-nowrap text-sm font-bold p-2">{statuses[idx]}</p>
-                                            </span>
+                                            </Badge>
                                         ) : null
                                     }
                                 </div>

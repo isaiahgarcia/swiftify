@@ -1,13 +1,17 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter as FontSans } from "next/font/google";
 import { getServerSession } from "next-auth";
 
-import SessionProvider from "./components/SessionProvider";
-import NavMenu from "./components/NavMenu";
+import SessionProvider from "@/components/SessionProvider";
+import NavMenu from "@/components/NavMenu";
 import { Toaster } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"] });
+const fontSans = FontSans({ 
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,7 +27,8 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      {/* <body className={inter.className}> */}
+      <body className={cn("bg-background font-sans antialiased", fontSans.variable)}>
         <SessionProvider>
           <main className="max-w-full bg-slate-950 text-2xl flex gap-2">
             <Toaster position="top-center" />
