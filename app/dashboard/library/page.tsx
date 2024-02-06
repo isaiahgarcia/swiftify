@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 import { SimplifiedPlaylist } from "spotify-types";
 import SpotifyApiRequest from "@/lib/spotify";
+import { redirect } from "next/navigation";
 
 export default function LibraryPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [playlists, setPlaylists] = useState<SimplifiedPlaylist[]>([]);
+
+  // Effect to establish a protected route if user is not signed in
+  useLayoutEffect(() => {
+    if (status === "unauthenticated") {
+      redirect('/');
+    }
+  }, [status])
 
   useEffect(() => {
     async function getUserPlaylists() {

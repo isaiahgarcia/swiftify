@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -10,22 +10,32 @@ import NavMenu from "@/components/NavMenu";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { PieChart } from "@/components/Chart";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [topNonTaylorSongs, setTopNonTaylorSongs] = useState<Track[]>([]);
   const [topTaylorSongs, setTopTaylorSongs] = useState<Track[]>([]);
+
+  // Effect to establish a protected route if user is not signed in
+  useLayoutEffect(() => {
+    if (status === "unauthenticated") {
+      redirect('/');
+    }
+  }, [status]);
 
   useEffect(() => {
     async function displayTopTaylorSongs() {
       if (session && session.accessToken) {
         // Grab current user's top Taylor Swift tracks
-        const data = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=50`, session.accessToken);
-        // const topTaylorSongs = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
-        // const topNonTaylorSongs = data.items.filter((track: any) => !track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
-        // setTopNonTaylorSongs(topNonTaylorSongs);
-        // setTopTaylorSongs(topTaylorSongs);
+        const data = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term`, session.accessToken);
+        if (data && data.items) {
+          const topTaylorSongs = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+          const topNonTaylorSongs = data.items.filter((track: any) => !track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+          setTopNonTaylorSongs(topNonTaylorSongs);
+          setTopTaylorSongs(topTaylorSongs);
+        }
       }
     }
     displayTopTaylorSongs();

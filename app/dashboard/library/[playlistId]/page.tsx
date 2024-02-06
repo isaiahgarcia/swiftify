@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import SpotifyApiRequest from "@/lib/spotify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
+import { useEffect, useLayoutEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Episode, PlaylistTrack, SimplifiedAlbum, SimplifiedTrack, Track } from "spotify-types";
 
@@ -37,13 +38,20 @@ const PlaylistPage = ({
 } : {
     params: { playlistId: string }
 }) => {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [playlistName, setPlaylistName] = useState<string>('');
     const [songs, setSongs] = useState<PlaylistTrack[]>([]);
     const [mapping, setMapping] = useState<any>({});
     const [stolenIds, setStolenIds] = useState<string[]>([]);
     const [tvIds, setTvIds] = useState<string[]>([]);
     const [statuses, setStatuses] = useState<string[]>([]);
+
+    // Effect to establish protected route if user is not signed in
+    useLayoutEffect(() => {
+        if (status === "unauthenticated") {
+            redirect('/');
+        }
+    }, [status]);
 
     // Listen for active session
     useEffect(() => {
