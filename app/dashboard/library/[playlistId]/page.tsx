@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import SpotifyApiRequest from "@/lib/spotify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -228,12 +229,12 @@ const PlaylistPage = ({
                     <div className="text-pretty font-bold">
                         {playlistName}
                     </div>
-                    <button 
+                    <Button 
                         className="bg-[#1db954] rounded-xl font-bold text-black p-2"
                         onClick={updatePlaylists}
                     >
                         update
-                    </button>
+                    </Button>
                 </div>
             </div>
             <div className="flex flex-col space-y-3">

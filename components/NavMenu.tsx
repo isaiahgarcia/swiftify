@@ -63,50 +63,45 @@ export default function NavMenu() {
     }, [session]);
 
     return (
-        <div className="w-1/4">
+        <div className="w-1/4 bg-slate-950 shadow-2xl">
             <AuthButton />
-            {session?.user?.name ? (
-                <>
-                <hr className="my-4" />
-                <ul>
-                    <Link href="/">
-                        <li className={pathname === "/" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                            Home
-                        </li>
-                    </Link>
-                    <Link href="/library">
-                        <li className={pathname === "/library" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                            Library
-                        </li>
-                    </Link>
-                </ul>
-                <hr className="my-4" />
-                <ul className="flex flex-col space-y-3">
-                    {
-                        playlists.map((playlist) => {
-                            const href = `/library/${playlist.id}`;
+            <hr className="my-4" />
+            <ul>
+                <Link href="/dashboard">
+                    <li className={pathname === "/dashboard" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                        Home
+                    </li>
+                </Link>
+                <Link href="/dashboard/library">
+                    <li className={pathname === "/dashboard/library" ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                        Library
+                    </li>
+                </Link>
+            </ul>
+            <hr className="my-4" />
+            <ul className="flex flex-col space-y-3">
+                {
+                    playlists.map((playlist) => {
+                        const href = `/dashboard/library/${playlist.id}`;
 
-                            return (
-                                <Link key={playlist.id} href={href}>
-                                    <li className={pathname === href ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
-                                        <div className="flex items-center space-x-3">
-                                            <Image
-                                                src={playlist.images[0]?.url}
-                                                width={50}
-                                                height={50}
-                                                alt="Playlist"
-                                            />
-                                            <p>{playlist.name}</p>
-                                        </div>
-                                    </li>
-                                </Link>
-                            )
-                        })
-                    }
-                </ul>
-                </>
-            ) : null}
+                        return (
+                            <Link key={playlist.id} href={href}>
+                                <li className={pathname === href ? ACTIVE_ROUTE : INACTIVE_ROUTE}>
+                                    <div className="flex items-center space-x-3">
+                                        <Image
+                                            src={playlist.images[0]?.url}
+                                            width={50}
+                                            height={50}
+                                            alt="Playlist"
+                                        />
+                                        <p>{playlist.name}</p>
+                                    </div>
+                                </li>
+                            </Link>
+                        )
+                    })
+                }
+            </ul>
         </div>
-
     );
 };
