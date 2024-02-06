@@ -29,13 +29,13 @@ export default function DashboardPage() {
     async function displayTopTaylorSongs() {
       if (session && session.accessToken) {
         // Grab current user's top Taylor Swift tracks
-        const data = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term`, session.accessToken);
-        if (data && data.items) {
-          const topTaylorSongs = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
-          const topNonTaylorSongs = data.items.filter((track: any) => !track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
-          setTopNonTaylorSongs(topNonTaylorSongs);
-          setTopTaylorSongs(topTaylorSongs);
-        }
+        // const data = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term`, session.accessToken);
+        // if (data && data.items) {
+        //   const topTaylorSongs = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+        //   const topNonTaylorSongs = data.items.filter((track: any) => !track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+        //   setTopNonTaylorSongs(topNonTaylorSongs);
+        //   setTopTaylorSongs(topTaylorSongs);
+        // }
       }
     }
     displayTopTaylorSongs();
