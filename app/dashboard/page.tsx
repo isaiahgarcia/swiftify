@@ -12,13 +12,15 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { PieChart } from "@/components/Chart";
 import { redirect } from "next/navigation";
 import { albumIdx, songsToAlbums } from "@/lib/TaylorSongs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
 
-  const [topNonTaylorSongs, setTopNonTaylorSongs] = useState<Track[]>([]);
   const [topTaylorSongs, setTopTaylorSongs] = useState<Track[]>([]);
-  const [topTaylorSongsByAlbum, setTopTaylorSongsByAlbum] = useState<Track[]>([]);
+  const [topTaylorSongsByAlbumShort, setTopTaylorSongsByAlbumShort] = useState<Track[]>([]);
+  const [topTaylorSongsByAlbumMedium, setTopTaylorSongsByAlbumMedium] = useState<Track[]>([]);
+  const [topTaylorSongsByAlbumLong, setTopTaylorSongsByAlbumLong] = useState<Track[]>([]);
 
   // Effect to establish a protected route if user is not signed in
   useLayoutEffect(() => {
@@ -31,17 +33,37 @@ export default function DashboardPage() {
     async function displayTopTaylorSongs() {
       if (session && session.accessToken) {
         // Grab current user's top Taylor Swift tracks
-        const data = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=short_term`, session.accessToken);
-        if (data && data.items) {
-          const topTaylorSongs = data.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
-          const topNonTaylorSongs = data.items.filter((track: any) => !track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+        const data_short_term = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=short_term`, session.accessToken);
+        if (data_short_term && data_short_term.items) {
+          const topTaylorSongs = data_short_term.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
           const albumsFromTopSongs = topTaylorSongs.map((track: any) => { return (track.name in songsToAlbums) ? songsToAlbums[track.name] : "" });
           const topSongBreakdown = new Array(10).fill(0);
           for (const album of albumsFromTopSongs) {
             if (album != "") topSongBreakdown[albumIdx[album]] += 1;
           }
-          setTopTaylorSongsByAlbum(topSongBreakdown);
-          setTopNonTaylorSongs(topNonTaylorSongs);
+          setTopTaylorSongsByAlbumShort(topSongBreakdown);
+        }
+
+        const data_medium_term = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=medium_term`, session.accessToken);
+        if (data_medium_term && data_medium_term.items) {
+          const topTaylorSongs = data_medium_term.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+          const albumsFromTopSongs = topTaylorSongs.map((track: any) => { return (track.name in songsToAlbums) ? songsToAlbums[track.name] : "" });
+          const topSongBreakdown = new Array(10).fill(0);
+          for (const album of albumsFromTopSongs) {
+            if (album != "") topSongBreakdown[albumIdx[album]] += 1;
+          }
+          setTopTaylorSongsByAlbumMedium(topSongBreakdown);
+        }
+
+        const data_long_term = await SpotifyApiRequest(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term`, session.accessToken);
+        if (data_long_term && data_long_term.items) {
+          const topTaylorSongs = data_long_term.items.filter((track: any) => track.artists.map((artist: any) => artist.id).includes('06HL4z0CvFAxyc27GXpf02'));
+          const albumsFromTopSongs = topTaylorSongs.map((track: any) => { return (track.name in songsToAlbums) ? songsToAlbums[track.name] : "" });
+          const topSongBreakdown = new Array(10).fill(0);
+          for (const album of albumsFromTopSongs) {
+            if (album != "") topSongBreakdown[albumIdx[album]] += 1;
+          }
+          setTopTaylorSongsByAlbumLong(topSongBreakdown);
           setTopTaylorSongs(topTaylorSongs);
         }
       }
@@ -54,14 +76,43 @@ export default function DashboardPage() {
       <NavMenu />
       <div className="w-3/4 flex flex-col items-center space-y-2">
         <div className="flex">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PieChart seriesData={topTaylorSongsByAlbum} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="short_term" className="">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="short_term">Last 4 Weeks</TabsTrigger>
+              <TabsTrigger value="medium_term">Last 6 Months</TabsTrigger>
+              <TabsTrigger value="long_term">All Time</TabsTrigger>
+            </TabsList>
+            <TabsContent value="short_term">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PieChart seriesData={topTaylorSongsByAlbumShort} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="medium_term">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PieChart seriesData={topTaylorSongsByAlbumMedium} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="long_term">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PieChart seriesData={topTaylorSongsByAlbumLong} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
         <Carousel className="max-w-xs">
           <CarouselContent>
