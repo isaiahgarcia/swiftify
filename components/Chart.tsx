@@ -17,6 +17,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         chart: {
           width: 380,
         },
+        colors: ["#b9d2b5", "#f4cb8d", "#d1b2d2", "#823549", "#b5e9f6", "#847e80", "#f9b2d0", "#cfcac6", "#c8ae95", "#434961"],
         labels: labelNames,
         plotOptions: {
           pie: {

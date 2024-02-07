@@ -88,7 +88,7 @@ export default function DashboardPage() {
                   <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PieChart seriesData={topTaylorSongsByAlbumShort} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                  <PieChart seriesData={topTaylorSongsByAlbumShort} labelNames={["Debut", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                   <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PieChart seriesData={topTaylorSongsByAlbumMedium} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                  <PieChart seriesData={topTaylorSongsByAlbumMedium} labelNames={["Debut", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                   <CardTitle className="text-center">Your Swiftie Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PieChart seriesData={topTaylorSongsByAlbumLong} labelNames={["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
+                  <PieChart seriesData={topTaylorSongsByAlbumLong} labelNames={["Debut", "Fearless", "Speak Now", "Red", "1989", "Reputation", "Lover", "folklore", "evermore", "Midnights"]} />
                 </CardContent>
               </Card>
             </TabsContent>
